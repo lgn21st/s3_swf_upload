@@ -104,18 +104,16 @@ if ( hasProductInstall && !hasRequestedVersion ) {
   	document["${application}"].initS3SWFUpload(
   		"18518BXJYB0KKSSCYSG2",                             //AWSAccessKeyId
   		"dlv",                                              //bucket
-  		"demo/",                                            //FilePath
   		"true",                                             //Secure (Use HTTPS, true or false)
   		"2008-12-31T12:00:00.000Z",                         //Expires
   		"private",                                          //acl
-  		"http://localhost:3000/s3/generate_signature");     //SignatureQueryURL
+  		"http://localhost:3000/s3_signatures");             //SignatureQueryURL
   }
   
   // -------------------------------- //
   // S3SWFUpload Complete Callback    //
   // -------------------------------- //
   function S3SWFUploadComplete() {
-    alert('Upload successful :-)');
   }
   
 // -->

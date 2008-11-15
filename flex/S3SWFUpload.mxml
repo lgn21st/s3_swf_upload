@@ -24,11 +24,10 @@
                 }
             }
             
-            private function initS3SWFUpload(AWSAccessKeyId:String, bucket:String, FilePath:String, Secure:String, Expires:String, acl:String, SignatureQueryURL:String):void {
+            private function initS3SWFUpload(AWSAccessKeyId:String, bucket:String, Secure:String, Expires:String, acl:String, SignatureQueryURL:String):void {
                 // TODO: validate
                 this.options.AWSAccessKeyId     = AWSAccessKeyId;
                 this.options.bucket             = bucket;
-                this.options.FilePath           = FilePath;
                 this.options.Secure             = Secure;
                 this.options.Expires            = Expires;
                 this.options.acl                = acl;
@@ -48,9 +47,6 @@
                     options.FileName = fileReference.name;
                     textInput.text = options.FileName;
                     
-                    // set options.key
-                    options.key = options.FilePath + options.FileName;
-                    
                     // set options.ContentType
                     var FileNameArray:Array = options.FileName.split(/\./);
                     var FileExtension:String = FileNameArray[FileNameArray.length - 1];
@@ -67,61 +63,16 @@
                 
                 variables.expiration_date  = options.Expires;
                 variables.bucket           = options.bucket;
-                variables.file_path        = options.FilePath;
-                variables.key              = options.key;
+                variables.file_name        = options.FileName;
                 variables.acl              = options.acl;
                 variables.content_type     = options.ContentType;
                 
                 request.method             = URLRequestMethod.POST;
-//              request.contentType        = "text/xml";
                 request.data               = variables;
                 loader.dataFormat          = URLLoaderDataFormat.TEXT;
                 
                 configureListeners(loader);
                 loader.load(request);
-            }
-            
-            private function post(options:S3UploadOptions):void {
-                
-                var request:S3UploadRequest = new S3UploadRequest(options);
-                
-                // hook up the user interface
-                request.addEventListener(Event.OPEN, function(event:Event):void {
-                    textInput.text = "Uploading...";
-                    trace(event);
-                    writeLine(event);
-                });
-                request.addEventListener(ProgressEvent.PROGRESS, function(event:ProgressEvent):void {
-                    // TODO: setProgressBar
-                });
-                request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
-                    textInput.text = "Upload error!";
-                    writeLine(event);
-                });
-                request.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {
-                    textInput.text = "Upload error!";
-                    writeLine(event);
-                });
-                request.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(event:Event):void {
-                    textInput.text = "Upload complete!";
-                    writeLine(event);
-                    
-                    // external javascript callback for upload complete
-                    ExternalInterface.call("S3SWFUploadComplete");
-                });
-                
-                function writeLine(t:String):void {
-                	trace(t);
-                }
-                
-                try {
-                    // submit the post request
-                    request.upload(fileReference);
-                } catch(e:Error) {
-                    textInput.text = "Upload exception!";
-                    writeLine("An error occurred: " + e);
-                }
-                
             }
             
             private function configureListeners(dispatcher:IEventDispatcher):void {
@@ -140,14 +91,17 @@
                 
                 // set options.policy and options.signature
                 for each(var elem:XML in xmllist) {
-                	switch(elem.name().toString()) {
-                		case 'policy':
-                		  options.policy = elem.toString();
-                		  break;
-                		case 'signature':
-                		  options.signature = elem.toString();
-                		  break;
-                	}
+                    switch(elem.name().toString()) {
+                    	case 'key':
+                    	    options.key = elem.toString();
+                    	    break;
+                        case 'policy':
+                            options.policy = elem.toString();
+                            break;
+                        case 'signature':
+                            options.signature = elem.toString();
+                            break;
+                    }
                 }
                 
                 // post upload file to S3
@@ -172,6 +126,44 @@
     
             private function ioErrorHandler(event:IOErrorEvent):void {
                 trace("ioErrorHandler: " + event);
+            }
+            
+            private function post(options:S3UploadOptions):void {
+                
+                var request:S3UploadRequest = new S3UploadRequest(options);
+                
+                // hook up the user interface
+                request.addEventListener(Event.OPEN, function(event:Event):void {
+                    textInput.text = "Uploading...";
+                    trace(event);
+                });
+                request.addEventListener(ProgressEvent.PROGRESS, function(event:ProgressEvent):void {
+                    // TODO: setProgressBar
+                });
+                request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
+                    textInput.text = "Upload error!";
+                    trace(event);
+                });
+                request.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {
+                    textInput.text = "Upload error!";
+                    trace(event);
+                });
+                request.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(event:Event):void {
+                    textInput.text = "Upload complete!";
+                    trace(event);
+                    
+                    // external javascript callback for upload complete
+                    ExternalInterface.call("S3SWFUploadComplete");
+                });
+                
+                try {
+                    // submit the post request
+                    request.upload(fileReference);
+                } catch(e:Error) {
+                    textInput.text = "Upload exception!";
+                    trace("An error occurred: " + e);
+                }
+                
             }
             
         ]]>

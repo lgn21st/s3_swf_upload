@@ -22,12 +22,9 @@ package com.elctech {
         public var file:String;
         
         /**
-         * Addition field:
-         * 		Secure: A flag indicating whether HTTPS should be used.
-         * 		Key = FilePath + FileName
+         * Addition field
          */
-        public var Secure:String;
-        public var FilePath:String;
+        public var Secure:String;           /* A flag indicating whether HTTPS should be used. */
         public var FileName:String;
         public var SignatureQueryURL:String;
     }

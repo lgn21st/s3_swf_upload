@@ -9,12 +9,13 @@ class S3SignaturesController < ApplicationController
   
   def create
     expiration_date = params[:expiration_date]
-    bucket = params[:bucket]
-    file_path   = params[:file_path]
-    key    = params[:key]
-    acl    = params[:acl]
-    content_type = params[:content_type]
-    
+    bucket          = params[:bucket]
+    acl             = params[:acl]
+    content_type    = params[:content_type]
+    path_prefix     = "" # Specify you path_prefix here.
+    file_name       = params[:file_name]
+    key             = path_prefix.blank? ? file_name : File.join(file_prefix, file_name)
+
     policy = Base64.encode64(
 "{
     'expiration': '#{expiration_date}',
@@ -27,18 +28,14 @@ class S3SignaturesController < ApplicationController
         ['eq', '$success_action_status', '201']
     ]
 }").gsub(/\n|\r/, '')
-    
+
     signature = b64_hmac_sha1(S3SwfUpload::S3Config.secret_access_key, policy)
-           
+
     respond_to do |format|
-      format.xml { 
-        render :xml => <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<s3>
-  <policy>#{policy}</policy>
-  <signature>#{signature}</signature>
-</s3>
-        XML
+      format.xml {
+        render :xml => {:key       => key,
+                        :policy    => policy,
+                        :signature => signature}.to_xml
       }
     end
   end
