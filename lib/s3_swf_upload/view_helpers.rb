@@ -10,8 +10,11 @@ module S3SwfUpload
       signature_url = options[:signature_url] || s3_signatures_url
       https         = options[:https] || 'false'
       acl           = options[:acl] || 'private'
+      js_helper     = options[:js_helper].nil? ? true : options[:js_helper]
       
-      js = <<-JS
+      out = ""
+      
+      out << %(
         <script src="/javascripts/AC_OETags.js" language="javascript"></script>
         <script language="JavaScript" type="text/javascript">
         <!--
@@ -69,8 +72,12 @@ module S3SwfUpload
             + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
             document.write(alternateContent);  // insert non-flash content
           }
-
-
+        </script>
+      )
+      
+      out << %(
+        <script language="JavaScript" type="text/javascript">
+        <!--
           // -------------------------------- //
           // initial function for S3SWFUpload //
           // -------------------------------- //
@@ -87,13 +94,13 @@ module S3SwfUpload
           // -------------------------------- //
           // S3SWFUpload Complete Callback    //
           // -------------------------------- //
-          function S3SWFUploadComplete() {
+          function S3SWFUploadComplete(key) {
           }
         // -->
         </script>
-      JS
+      ) if js_helper
         
-      html = content_tag :noscript do
+      out << content_tag(:noscript) do
         content_tag :object, :classid => "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000",
                     :id => "S3SWFUpload", :width => "#{width}", :height => "#{height}",
                     :codebase => "http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" do
@@ -115,7 +122,7 @@ module S3SwfUpload
         end
       end
       
-      js + html
+      return out
     end
   end
 end

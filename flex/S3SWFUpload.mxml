@@ -157,7 +157,7 @@
                     trace(event);
                     
                     // external javascript callback for upload complete
-                    ExternalInterface.call("S3SWFUploadComplete");
+                    ExternalInterface.call("S3SWFUploadComplete", options.key);
                 });
                 
                 try {
