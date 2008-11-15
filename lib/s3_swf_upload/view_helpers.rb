@@ -3,13 +3,6 @@ module S3SwfUpload
     def s3_swf_upload_tag(options = {})
       height        = options[:height] || 70
       width         = options[:width] || 170
-      bucket        = options[:bucket] || S3SwfUpload::S3Config.bucket
-      access_key_id = options[:access_key_id] || S3SwfUpload::S3Config.access_key_id
-      path          = options[:file_path] || ''
-      expiration    = options[:expiration] || 1.hours.from_now.strftime('%Y-%m-%dT%H:%M:%S.000Z')
-      signature_url = options[:signature_url] || s3_signatures_url
-      https         = options[:https] || 'false'
-      acl           = options[:acl] || 'private'
       js_helper     = options[:js_helper].nil? ? true : options[:js_helper]
       
       out = ""
@@ -75,30 +68,8 @@ module S3SwfUpload
         </script>
       )
       
-      out << %(
-        <script language="JavaScript" type="text/javascript">
-        <!--
-          // -------------------------------- //
-          // initial function for S3SWFUpload //
-          // -------------------------------- //
-          function initS3SWFUpload() {
-            document["S3SWFUpload"].initS3SWFUpload(
-                "#{access_key_id}",     //AWSAccessKeyId
-                "#{bucket}",            //bucket
-                "#{https}",             //Secure (Use HTTPS, true or false)
-                "#{expiration}",        //Expires
-                "#{acl}",               //acl
-                "#{signature_url}");    //SignatureQueryURL
-          }
-
-          // -------------------------------- //
-          // S3SWFUpload Complete Callback    //
-          // -------------------------------- //
-          function S3SWFUploadComplete(key) {
-          }
-        // -->
-        </script>
-      ) if js_helper
+      out << js_s3_swf_upload_init     if js_helper
+      out << js_s3_swf_upload_complete if js_helper
         
       out << content_tag(:noscript) do
         content_tag :object, :classid => "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000",
@@ -123,6 +94,48 @@ module S3SwfUpload
       end
       
       return out
+    end
+    
+    def js_s3_swf_upload_init(options={})
+      bucket        = options[:bucket] || S3SwfUpload::S3Config.bucket
+      access_key_id = options[:access_key_id] || S3SwfUpload::S3Config.access_key_id
+      expiration    = options[:expiration] || 1.hours.from_now.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+      signature_url = options[:signature_url] || s3_signatures_url
+      https         = options[:https] || 'false'
+      acl           = options[:acl] || 'private'
+      
+      %(
+        <script language="JavaScript" type="text/javascript">
+        <!--
+          // -------------------------------- //
+          // initial function for S3SWFUpload //
+          // -------------------------------- //
+          function initS3SWFUpload() {
+            document["S3SWFUpload"].initS3SWFUpload(
+                "#{access_key_id}",     //AWSAccessKeyId
+                "#{bucket}",            //bucket
+                "#{https}",             //Secure (Use HTTPS, true or false)
+                "#{expiration}",        //Expires
+                "#{acl}",               //acl
+                "#{signature_url}");    //SignatureQueryURL
+          }
+        // -->
+        </script>
+      )
+    end
+    
+    def js_s3_swf_upload_complete
+      %(
+        <script language="JavaScript" type="text/javascript">
+        <!--
+          // -------------------------------- //
+          // S3SWFUpload Complete Callback    //
+          // -------------------------------- //
+          function S3SWFUploadComplete(key) {
+          }
+        // -->
+        </script>
+      )
     end
   end
 end
