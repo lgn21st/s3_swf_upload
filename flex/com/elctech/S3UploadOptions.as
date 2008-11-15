@@ -26,6 +26,7 @@ package com.elctech {
          */
         public var Secure:String;           /* A flag indicating whether HTTPS should be used. */
         public var FileName:String;
+        public var FileSize:String;
         public var SignatureQueryURL:String;
     }
 }

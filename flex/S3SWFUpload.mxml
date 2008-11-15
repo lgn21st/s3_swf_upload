@@ -47,6 +47,9 @@
                     options.FileName = fileReference.name;
                     textInput.text = options.FileName;
                     
+                    // set options:FileSize
+                    options.FileSize = fileReference.size.toString();
+                    
                     // set options.ContentType
                     var FileNameArray:Array = options.FileName.split(/\./);
                     var FileExtension:String = FileNameArray[FileNameArray.length - 1];
@@ -64,6 +67,7 @@
                 variables.expiration_date  = options.Expires;
                 variables.bucket           = options.bucket;
                 variables.file_name        = options.FileName;
+                variables.file_size        = options.FileSize;
                 variables.acl              = options.acl;
                 variables.content_type     = options.ContentType;
                 
