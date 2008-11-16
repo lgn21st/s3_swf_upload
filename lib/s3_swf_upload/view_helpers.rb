@@ -1,8 +1,8 @@
 module S3SwfUpload
   module ViewHelpers
     def s3_swf_upload_tag(options = {})
-      height        = options[:height] || 70
-      width         = options[:width] || 170
+      height        = options[:height] || 35
+      width         = options[:width] || 300
       js_helper     = options[:js_helper].nil? ? true : options[:js_helper]
       
       out = ""
@@ -68,8 +68,7 @@ module S3SwfUpload
         </script>
       )
       
-      out << js_s3_swf_upload_init     if js_helper
-      out << js_s3_swf_upload_complete if js_helper
+      out << js_s3_swf_upload_init if js_helper
         
       out << content_tag(:noscript) do
         content_tag :object, :classid => "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000",
@@ -118,20 +117,6 @@ module S3SwfUpload
                 "#{expiration}",        //Expires
                 "#{acl}",               //acl
                 "#{signature_url}");    //SignatureQueryURL
-          }
-        // -->
-        </script>
-      )
-    end
-    
-    def js_s3_swf_upload_complete
-      %(
-        <script language="JavaScript" type="text/javascript">
-        <!--
-          // -------------------------------- //
-          // S3SWFUpload Complete Callback    //
-          // -------------------------------- //
-          function S3SWFUploadComplete(key) {
           }
         // -->
         </script>
