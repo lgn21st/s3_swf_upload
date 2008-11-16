@@ -25,6 +25,7 @@ package com.elctech {
          * Addition field
          */
         public var Secure:String;           /* A flag indicating whether HTTPS should be used. */
+        public var PrefixPath:String;
         public var FileName:String;
         public var FileSize:String;
         public var SignatureQueryURL:String;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();" layout="absolute" height="70" width="170">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();" layout="absolute" height="35" width="300">
 
     <mx:Script>
         <![CDATA[
@@ -20,6 +20,7 @@
             private function init():void {
                 if (ExternalInterface.available) {
                   ExternalInterface.addCallback("initS3SWFUpload", initS3SWFUpload);
+                  ExternalInterface.addCallback("startUpload", upload);
                   ExternalInterface.call("initS3SWFUpload");
                 }
             }
@@ -32,6 +33,7 @@
                 this.options.Expires            = Expires;
                 this.options.acl                = acl;
                 this.options.SignatureQueryURL  = SignatureQueryURL;
+                this.options.PrefixPath         = "";
             }
             
             private function browser():void {
@@ -54,22 +56,28 @@
                     var FileNameArray:Array = options.FileName.split(/\./);
                     var FileExtension:String = FileNameArray[FileNameArray.length - 1];
                     options.ContentType = mimeMap.getMimeType(FileExtension);
+                    
+                    ExternalInterface.call("s3SWFFileSelected", options.FileName, options.FileSize);
                 });
                 
                 fileReference.browse();
             }
             
-            private function upload():void {
+            private function upload(prefixPath:String = ""):void {
                 var request:URLRequest     = new URLRequest(options.SignatureQueryURL);
                 var loader:URLLoader       = new URLLoader();
                 var variables:URLVariables = new URLVariables();
                 
+                // set options.PrefixPath and options.key
+                options.PrefixPath 		   = prefixPath; // override options.PrefixPath
+                options.key				   = options.PrefixPath + options.FileName;
+                
                 variables.expiration_date  = options.Expires;
                 variables.bucket           = options.bucket;
-                variables.file_name        = options.FileName;
                 variables.file_size        = options.FileSize;
                 variables.acl              = options.acl;
                 variables.content_type     = options.ContentType;
+                variables.key			   = options.key;
                 
                 request.method             = URLRequestMethod.POST;
                 request.data               = variables;
@@ -96,9 +104,6 @@
                 // set options.policy and options.signature
                 for each(var elem:XML in xmllist) {
                     switch(elem.name().toString()) {
-                    	case 'key':
-                    	    options.key = elem.toString();
-                    	    break;
                         case 'policy':
                             options.policy = elem.toString();
                             break;
@@ -174,7 +179,6 @@
     </mx:Script>
     
     <mx:Label x="10" y="10" id="textInput" color="#FFFFFF" fontWeight="bold" text="Click the browser button."/>
-    <mx:Button x="10" y="38" label="Browser" click="browser();"/>
-    <mx:Button x="95" y="38" label="Upload" click="upload()"/>
+    <mx:Button x="217" y="8" label="Browser" click="browser();"/>
     
 </mx:Application>

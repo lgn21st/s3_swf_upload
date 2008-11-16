@@ -12,10 +12,8 @@ class S3SignaturesController < ApplicationController
     bucket          = params[:bucket]
     acl             = params[:acl]
     content_type    = params[:content_type]
-    path_prefix     = "" # Specify you path_prefix here.
-    file_name       = params[:file_name]
+    key             = params[:key]
     file_size       = params[:file_size]
-    key             = path_prefix.blank? ? file_name : File.join(file_prefix, file_name)
 
     policy = Base64.encode64(
 "{
@@ -34,8 +32,7 @@ class S3SignaturesController < ApplicationController
 
     respond_to do |format|
       format.xml {
-        render :xml => {:key       => key,
-                        :policy    => policy,
+        render :xml => {:policy    => policy,
                         :signature => signature}.to_xml
       }
     end
