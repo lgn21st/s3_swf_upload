@@ -9,11 +9,13 @@
 <body scroll="no">
     <script type="text/javascript">
         swfobject.embedSWF("${application}.swf", "${application}", "${width}", "${height}", "${version_major}.${version_minor}.${version_revision}");
-        function initS3SWFUpload() { document["${application}"].initS3SWFUpload("http://localhost:3000/s3_signatures"); }
-        function S3SWFUploadSuccess() {alert('successful');}
-        function S3SWFUploadFailed() {alert('failed');}
+        function s3_upload()  {document["${application}"].init("http://localhost:3000/s3_signatures", "", "", "", "");}
+        function onSuccess()  {alert('successful');}
+        function onFailed()   {alert('failed');}
+        function onSelected() {alert('selected');}
+        function onCancel()   {alert('cancel');}
     </script>
     <div id="${application}"></div>
-    <br/><a href="#" onclick="document['${application}'].startUpload('assets/temp/');">Start Upload</a>
+    <br/><a href="#" onclick="document['${application}'].upload('assets/temp/');">Start Upload</a>
 </body>
 </html>

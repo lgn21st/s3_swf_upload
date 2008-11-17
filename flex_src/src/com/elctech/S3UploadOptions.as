@@ -29,5 +29,17 @@ package com.elctech {
         public var FileName:String;
         public var FileSize:String;
         public var SignatureQueryURL:String;
+
+        public var onSuccessCall:String  = "onSuccess";
+        public var onFailedCall:String   = "onFailed";
+        public var onSelectedCall:String = "onSelected";
+        public var onCancelCall:String   = "onCancel";
+
+//        public function S3UploadOptions():void {
+//        	this.onSuccessCall  = "onSuccess";
+//            this.onFailedCall   = "onFailed";
+//            this.onSelectedCall = "onSelected";
+//            this.onCancelCall   = "onCancel";
+//        }
     }
 }

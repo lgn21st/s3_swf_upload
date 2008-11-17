@@ -8,9 +8,7 @@
             import mx.controls.Alert;
             import flash.external.ExternalInterface;
             import flash.net.FileReference;
-            
             import com.adobe.net.MimeTypeMap;
-            
             import com.elctech.S3UploadOptions;
             
             private var mimeMap:MimeTypeMap = new MimeTypeMap();
@@ -21,13 +19,16 @@
                 if (ExternalInterface.available) {
                   ExternalInterface.addCallback("init", init);
                   ExternalInterface.addCallback("upload", upload);
+                  ExternalInterface.call('s3_upload');
                 }
             }
             
-            private function initS3SWFUpload(SignatureQueryURL:String):void {
-                // TODO: validate
-                this.options.SignatureQueryURL  = SignatureQueryURL;
-                this.options.PrefixPath         = "";
+            private function init(url:String, onSuccess:String="", onFailed:String="", onSelected:String="", onCancel:String=""):void {
+                options.SignatureQueryURL = url;
+                if (onSuccess  != "") { options.onSuccessCall  = onSuccess;  }
+                if (onFailed   != "") { options.onFailedCall   = onFailed;   }
+                if (onSelected != "") { options.onSelectedCall = onSelected; }
+                if (onCancel   != "") { options.onCancelCall   = onCancel;   }
             }
             
             private function browser():void {
@@ -51,7 +52,8 @@
                     var FileExtension:String = FileNameArray[FileNameArray.length - 1];
                     options.ContentType = mimeMap.getMimeType(FileExtension);
                     
-                    ExternalInterface.call("s3SWFFileSelected", options.FileName, options.FileSize);
+                    trace(options.onSelectedCall);
+                    ExternalInterface.call(options.onSelectedCall, options.FileName, options.FileSize);
                 });
                 
                 fileReference.browse();
@@ -60,7 +62,7 @@
             private function upload(prefixPath:String = ""):void {
             	// return if user not selected any file
             	if (options.FileSize == null) {
-            		ExternalInterface.call("S3SWFUploadSuccess");
+            		ExternalInterface.call(this.options.onSuccessCall);
             		return;
             	}
             	
@@ -141,17 +143,17 @@
                 });
                 request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
                     textInput.text = "Upload error!";
-                    ExternalInterface.call("S3SWFUploadFailed");
+                    ExternalInterface.call(options.onFailedCall);
                     trace(event);
                 });
                 request.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {
                     textInput.text = "Upload error!";
-                    ExternalInterface.call("S3SWFUploadFailed");
+                    ExternalInterface.call(options.onFailedCall);
                     trace(event);
                 });
                 request.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(event:Event):void {
                     textInput.text = "Upload complete!";
-                    ExternalInterface.call("S3SWFUploadSuccess");
+                    ExternalInterface.call(options.onSuccessCall);
                     trace(event);
                 });
                 
