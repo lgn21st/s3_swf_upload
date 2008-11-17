@@ -61,7 +61,7 @@
             private function upload(prefixPath:String = ""):void {
             	// return if user not selected any file
             	if (options.FileSize == null) {
-            		ExternalInterface.call("S3SWFUploadFailed");
+            		ExternalInterface.call("S3SWFUploadSuccess");
             		return;
             	}
             	
