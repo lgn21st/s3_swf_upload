@@ -19,11 +19,11 @@ Usage
 
 3. init s3 swf with js:
 
-  s3_swf.init(url, 'onSelected', 'onSuccess', 'onFailed', 'onCancel')
+  function s3_upload() { s3_swf.init(url, 'onSelected', 'onSuccess', 'onFailed', 'onCancel'); }
 
   s3_swf is a global var which reference to the s3 swf object.
   
-  S3 swf provides 4 callbacks at currently:
+  S3_swf.init() provides 4 callbacks at currently:
 
     1. onSuccess, be called after an upload finished
     2. onFailed, be called if an upload is failed

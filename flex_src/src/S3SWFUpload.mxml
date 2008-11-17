@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();" layout="absolute" height="35" width="300">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="registerCallbacks();" layout="absolute" height="35" width="300">
 
     <mx:Script>
         <![CDATA[
@@ -17,11 +17,10 @@
             private var options:S3UploadOptions = new S3UploadOptions();
             private var fileReference:FileReference;
             
-            private function init():void {
+            private function registerCallbacks():void {
                 if (ExternalInterface.available) {
-                  ExternalInterface.addCallback("initS3SWFUpload", initS3SWFUpload);
-                  ExternalInterface.addCallback("startUpload", upload);
-                  ExternalInterface.call("initS3SWFUpload");
+                  ExternalInterface.addCallback("init", init);
+                  ExternalInterface.addCallback("upload", upload);
                 }
             }
             
