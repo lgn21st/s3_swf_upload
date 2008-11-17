@@ -1,13 +1,38 @@
 S3SwfUpload
 ===========
 
-Introduction goes here.
+S3SwfUpload allow user uploading a file to S3 directly, so you can save the cost of uploading process in your app server.
 
-
-Example
+Install
 =======
 
-Example goes here.
+Install goes here.
+
+Usage
+=======
+
+1. $ script/generate s3_swf
+
+2. include s3 swf in your view.
+
+<%= s3_swf_tag %>
+
+3. init s3 swf with js:
+
+    s3_swf.init({onSuccess:fn, onFailed:fn, onSelected: fn, onCancel: fn})
+
+  s3_swf is a global var which reference to the s3 swf object.
+  
+  S3 swf provides 4 callbacks at currently:
+
+    1. onSuccess, be called after an upload finished
+    2. onFailed, be called if an upload is failed
+    3. onSelected, be called when user choose a file
+    4. onCancel, be called when an upload is cancelled
+
+4. upload selected file to specify path.
+
+    s3_swf.upload(path)
 
 
-Copyright (c) 2008 [name of plugin creator], released under the MIT license
+Copyright (c) 2008 elctech, released under the MIT license
