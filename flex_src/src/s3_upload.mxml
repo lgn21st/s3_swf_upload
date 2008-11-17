@@ -200,8 +200,8 @@
         ]]>
     </mx:Script>
     
-    <mx:Label x="10" y="10" id="textInput" color="#FFFFFF" fontWeight="bold" text="Click the browser button."/>
-    <mx:Button x="217" y="7" label="Browser" click="browser()" id="selectButton"/>
+    <mx:Label x="10" y="10" id="textInput" color="#FFFFFF" fontWeight="bold" text="Click the Select File Button... "/>
+    <mx:Button x="227" y="7" label="Select" click="browser()" id="selectButton"/>
     <mx:ProgressBar x="10" y="7" width="200" height="20" labelPlacement="center" id="uploadProgressBar" minimum="0" maximum="100" visible="false" mode="manual"/>
     
 </mx:Application>
