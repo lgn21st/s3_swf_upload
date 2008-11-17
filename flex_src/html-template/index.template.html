@@ -1,0 +1,19 @@
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="swfobject.js"></script>
+    <title>${title}</title>
+</head>
+
+<body scroll="no">
+    <script type="text/javascript">
+        swfobject.embedSWF("${application}.swf", "${application}", "${width}", "${height}", "${version_major}.${version_minor}.${version_revision}");
+        function initS3SWFUpload() { document["${application}"].initS3SWFUpload("http://localhost:3000/s3_signatures"); }
+        function S3SWFUploadSuccess() {alert('successful');}
+        function S3SWFUploadFailed() {alert('failed');}
+    </script>
+    <div id="${application}"></div>
+    <br/><a href="#" onclick="document['${application}'].startUpload('assets/temp/');">Start Upload</a>
+</body>
+</html>
