@@ -19,7 +19,7 @@ Usage
 
 3. init s3 swf with js:
 
-    s3_swf.init({onSuccess:fn, onFailed:fn, onSelected: fn, onCancel: fn})
+  s3_swf.init(url, 'onSelected', 'onSuccess', 'onFailed', 'onCancel')
 
   s3_swf is a global var which reference to the s3 swf object.
   
