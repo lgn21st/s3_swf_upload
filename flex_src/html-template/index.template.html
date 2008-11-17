@@ -10,10 +10,10 @@
     <script type="text/javascript">
         swfobject.embedSWF("${application}.swf", "${application}", "${width}", "${height}", "${version_major}.${version_minor}.${version_revision}");
         function s3_upload()  {document["${application}"].init("http://localhost:3000/s3_signatures", "", "", "", "");}
-        function onSuccess()  {alert('successful');}
-        function onFailed()   {alert('failed');}
-        function onSelected() {alert('selected');}
-        function onCancel()   {alert('cancel');}
+        function onSuccess()  {}
+        function onFailed()   {}
+        function onSelected() {}
+        function onCancel()   {}
     </script>
     <div id="${application}"></div>
     <br/><a href="#" onclick="document['${application}'].upload('assets/temp/');">Start Upload</a>

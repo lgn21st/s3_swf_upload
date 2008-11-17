@@ -60,6 +60,7 @@
             }
             
             private function upload(prefixPath:String = ""):void {
+            	
             	// return if user not selected any file
             	if (options.FileSize == null) {
             		ExternalInterface.call(this.options.onSuccessCall);
@@ -137,21 +138,31 @@
                 
                 request.addEventListener(Event.OPEN, function(event:Event):void {
                     textInput.text = "Uploading...";
+                    uploadProgressBar.visible = true;
+                    selectButton.enabled = false;
                     trace(event);
                 });
                 request.addEventListener(ProgressEvent.PROGRESS, function(event:ProgressEvent):void {
+                	var proc:Number = event.bytesLoaded / event.bytesTotal * 100;
+                	uploadProgressBar.setProgress(proc, 100);
                 });
                 request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
+                	uploadProgressBar.visible = false;
+                	selectButton.enabled = true;
                     textInput.text = "Upload error!";
                     ExternalInterface.call(options.onFailedCall);
                     trace(event);
                 });
                 request.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {
+                	uploadProgressBar.visible = false;
+                	selectButton.enabled = true;
                     textInput.text = "Upload error!";
                     ExternalInterface.call(options.onFailedCall);
                     trace(event);
                 });
                 request.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(event:Event):void {
+                	uploadProgressBar.visible = false;
+                	selectButton.enabled = true;
                     textInput.text = "Upload complete!";
                     ExternalInterface.call(options.onSuccessCall);
                     trace(event);
@@ -160,6 +171,8 @@
                 try {
                     request.upload(fileReference);
                 } catch(e:Error) {
+                	uploadProgressBar.visible = false;
+                    selectButton.enabled = true;
                     textInput.text = "Upload exception!";
                     trace("An error occurred: " + e);
                 }
@@ -188,6 +201,7 @@
     </mx:Script>
     
     <mx:Label x="10" y="10" id="textInput" color="#FFFFFF" fontWeight="bold" text="Click the browser button."/>
-    <mx:Button x="217" y="8" label="Browser" click="browser();"/>
+    <mx:Button x="217" y="7" label="Browser" click="browser()" id="selectButton"/>
+    <mx:ProgressBar x="10" y="7" width="200" height="20" labelPlacement="center" id="uploadProgressBar" minimum="0" maximum="100" visible="false" mode="manual"/>
     
 </mx:Application>

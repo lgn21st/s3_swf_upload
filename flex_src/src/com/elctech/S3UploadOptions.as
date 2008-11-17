@@ -35,11 +35,5 @@ package com.elctech {
         public var onSelectedCall:String = "onSelected";
         public var onCancelCall:String   = "onCancel";
 
-//        public function S3UploadOptions():void {
-//        	this.onSuccessCall  = "onSuccess";
-//            this.onFailedCall   = "onFailed";
-//            this.onSelectedCall = "onSelected";
-//            this.onCancelCall   = "onCancel";
-//        }
     }
 }
