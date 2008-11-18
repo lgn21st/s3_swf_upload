@@ -2,206 +2,204 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="registerCallbacks();" layout="absolute" height="35" width="300">
 
     <mx:Script>
-        <![CDATA[
-            import com.elctech.S3UploadRequest;
-            
-            import mx.controls.Alert;
-            import flash.external.ExternalInterface;
-            import flash.net.FileReference;
-            import com.adobe.net.MimeTypeMap;
-            import com.elctech.S3UploadOptions;
-            
-            private var mimeMap:MimeTypeMap = new MimeTypeMap();
-            private var options:S3UploadOptions = new S3UploadOptions();
-            private var fileReference:FileReference;
-            
-            private function registerCallbacks():void {
-                if (ExternalInterface.available) {
-                  ExternalInterface.addCallback("init", init);
-                  ExternalInterface.addCallback("upload", upload);
-                  ExternalInterface.call('s3_upload');
-                }
-            }
-            
-            private function init(url:String, onSuccess:String="", onFailed:String="", onSelected:String="", onCancel:String=""):void {
-                options.SignatureQueryURL = url;
-                if (onSuccess  != "") { options.onSuccessCall  = onSuccess;  }
-                if (onFailed   != "") { options.onFailedCall   = onFailed;   }
-                if (onSelected != "") { options.onSelectedCall = onSelected; }
-                if (onCancel   != "") { options.onCancelCall   = onCancel;   }
-            }
-            
-            private function browser():void {
-                this.fileReference = new FileReference();
-                
-                // setup file reference event handlers
-                fileReference.addEventListener(Event.CANCEL, function(event:Event):void {
-                    // TODO: cancel the upload.
-                });
-                
-                fileReference.addEventListener(Event.SELECT, function(event:Event):void {
-                    // set options.FileName
-                    options.FileName = fileReference.name.replace(/^.*(\\|\/)/gi, '').replace(/[^A-Za-z0-9\.\-]/gi, '_');
-                    textInput.text   = options.FileName;
-                    
-                    // set options:FileSize
-                    options.FileSize = fileReference.size.toString();
-                    
-                    // set options.ContentType
-                    var FileNameArray:Array = options.FileName.split(/\./);
-                    var FileExtension:String = FileNameArray[FileNameArray.length - 1];
-                    options.ContentType = mimeMap.getMimeType(FileExtension);
-                    
-                    trace(options.onSelectedCall);
-                    ExternalInterface.call(options.onSelectedCall, options.FileName, options.FileSize);
-                });
-                
-                fileReference.browse();
-            }
-            
-            private function upload(prefixPath:String = ""):void {
-            	
-            	// return if user not selected any file
-            	if (options.FileSize == null) {
-            		ExternalInterface.call(this.options.onSuccessCall);
-            		return;
-            	}
-            	
-                // ======================== //
-                // Start Query S3 Signature //
-                // ======================== //
-                var request:URLRequest     = new URLRequest(options.SignatureQueryURL);
-                var loader:URLLoader       = new URLLoader();
-                var variables:URLVariables = new URLVariables();
-                
-                options.PrefixPath 		   = prefixPath; // reset options.PrefixPath
-                options.key				   = options.PrefixPath + options.FileName;
-                
-                variables.file_name        = options.FileName;
-                variables.file_size        = options.FileSize;
-                variables.key              = options.key;
-                variables.content_type     = options.ContentType;
-                
-                request.method             = URLRequestMethod.POST;
-                request.data               = variables;
-                loader.dataFormat          = URLLoaderDataFormat.TEXT;
-                
-                configureListeners(loader);
-                loader.load(request);
-            }
-            
-            private function configureListeners(dispatcher:IEventDispatcher):void {
-                dispatcher.addEventListener(Event.COMPLETE, completeHandler);
-                dispatcher.addEventListener(Event.OPEN, openHandler);
-                dispatcher.addEventListener(ProgressEvent.PROGRESS, progressHandler);
-                dispatcher.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
-                dispatcher.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
-                dispatcher.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-            }
-
-            private function completeHandler(event:Event):void {
-                var loader:URLLoader = URLLoader(event.target);
-                var xml:XML  = new XML(loader.data);
-                var xmllist:XMLList = xml.children();
-                
-                // set options.policy and options.signature
-                for each(var elem:XML in xmllist) {
-                    switch(elem.name().toString()) {
-                        case 'policy':
-                            options.policy = elem.toString();
-                            break;
-                        case 'signature':
-                            options.signature = elem.toString();
-                            break;
-                        case 'bucket':
-                            options.bucket = elem.toString();
-                            break;
-                        case 'accesskeyid':
-                            options.AWSAccessKeyId = elem.toString();
-                            break;
-                        case 'acl':
-                            options.acl = elem.toString();
-                            break;
-                        case 'expirationdate':
-                            options.Expires = elem.toString();
-                            break;
-                        case 'https':
-                            options.Secure = elem.toString();
-                            break;
-                    }
-                }
-                
-                // ===================== //
-                // Start post file to S3 //
-                // ===================== //
-                var request:S3UploadRequest = new S3UploadRequest(options);
-                
-                request.addEventListener(Event.OPEN, function(event:Event):void {
-                    textInput.text = "Uploading...";
-                    uploadProgressBar.visible = true;
-                    selectButton.enabled = false;
-                    trace(event);
-                });
-                request.addEventListener(ProgressEvent.PROGRESS, function(event:ProgressEvent):void {
-                	var proc:Number = event.bytesLoaded / event.bytesTotal * 100;
-                	uploadProgressBar.setProgress(proc, 100);
-                });
-                request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
-                	uploadProgressBar.visible = false;
-                	selectButton.enabled = true;
-                    textInput.text = "Upload error!";
-                    ExternalInterface.call(options.onFailedCall);
-                    trace(event);
-                });
-                request.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {
-                	uploadProgressBar.visible = false;
-                	selectButton.enabled = true;
-                    textInput.text = "Upload error!";
-                    ExternalInterface.call(options.onFailedCall);
-                    trace(event);
-                });
-                request.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(event:Event):void {
-                	uploadProgressBar.visible = false;
-                	selectButton.enabled = true;
-                    textInput.text = "Upload complete!";
-                    ExternalInterface.call(options.onSuccessCall);
-                    trace(event);
-                });
-                
-                try {
-                    request.upload(fileReference);
-                } catch(e:Error) {
-                	uploadProgressBar.visible = false;
-                    selectButton.enabled = true;
-                    textInput.text = "Upload exception!";
-                    trace("An error occurred: " + e);
-                }
-            }
-    
-            private function openHandler(event:Event):void {
-                trace("openHandler: " + event);
-            }
-    
-            private function progressHandler(event:ProgressEvent):void {
-                trace("progressHandler loaded:" + event.bytesLoaded + " total: " + event.bytesTotal);
-            }
-    
-            private function securityErrorHandler(event:SecurityErrorEvent):void {
-                trace("securityErrorHandler: " + event);
-            }
-    
-            private function httpStatusHandler(event:HTTPStatusEvent):void {
-                trace("httpStatusHandler: " + event);
-            }
-    
-            private function ioErrorHandler(event:IOErrorEvent):void {
-                trace("ioErrorHandler: " + event);
-            }
-        ]]>
+    	<![CDATA[
+    		import mx.controls.Alert;
+			import flash.external.ExternalInterface;
+			import flash.net.FileReference;
+			import com.adobe.net.MimeTypeMap;
+			import com.elctech.S3UploadOptions;
+			import com.elctech.S3UploadRequest;
+			
+			private var mimeMap:MimeTypeMap = new MimeTypeMap();
+			private var options:S3UploadOptions = new S3UploadOptions();
+			private var fileReference:FileReference;
+			
+			private function registerCallbacks():void {
+			    if (ExternalInterface.available) {
+			      ExternalInterface.addCallback("init", init);
+			      ExternalInterface.addCallback("upload", upload);
+			      ExternalInterface.call('s3_upload');
+			    }
+			}
+			
+			private function init(url:String, onSuccess:String="", onFailed:String="", onSelected:String="", onCancel:String=""):void {
+			    options.SignatureQueryURL = url;
+			    if (onSuccess  != "") { options.onSuccessCall  = onSuccess;  }
+			    if (onFailed   != "") { options.onFailedCall   = onFailed;   }
+			    if (onSelected != "") { options.onSelectedCall = onSelected; }
+			    if (onCancel   != "") { options.onCancelCall   = onCancel;   }
+			}
+			
+			private function browser():void {
+			    this.fileReference = new FileReference();
+			    
+			    // setup file reference event handlers
+			    fileReference.addEventListener(Event.CANCEL, function(event:Event):void {
+			        // TODO: cancel the upload.
+			    });
+			    
+			    fileReference.addEventListener(Event.SELECT, function(event:Event):void {
+			        // set options.FileName
+			        options.FileName = fileReference.name.replace(/^.*(\\|\/)/gi, '').replace(/[^A-Za-z0-9\.\-]/gi, '_');
+			        textInput.text   = options.FileName;
+			        
+			        // set options:FileSize
+			        options.FileSize = fileReference.size.toString();
+			        
+			        // set options.ContentType
+			        var FileNameArray:Array = options.FileName.split(/\./);
+			        var FileExtension:String = FileNameArray[FileNameArray.length - 1];
+			        options.ContentType = mimeMap.getMimeType(FileExtension);
+			        
+			        trace(options.onSelectedCall);
+			        ExternalInterface.call(options.onSelectedCall, options.FileName, options.FileSize);
+			    });
+			    
+			    fileReference.browse();
+			}
+			
+			private function upload(prefixPath:String = ""):void {
+			    
+			    // return if user not selected any file
+			    if (options.FileSize == null) {
+			        ExternalInterface.call(this.options.onSuccessCall);
+			        return;
+			    }
+			    
+			    // ======================== //
+			    // Start Query S3 Signature //
+			    // ======================== //
+			    var request:URLRequest     = new URLRequest(options.SignatureQueryURL);
+			    var loader:URLLoader       = new URLLoader();
+			    var variables:URLVariables = new URLVariables();
+			    
+			    options.PrefixPath         = prefixPath; // reset options.PrefixPath
+			    options.key                = options.PrefixPath + options.FileName;
+			    
+			    variables.file_name        = options.FileName;
+			    variables.file_size        = options.FileSize;
+			    variables.key              = options.key;
+			    variables.content_type     = options.ContentType;
+			    
+			    request.method             = URLRequestMethod.POST;
+			    request.data               = variables;
+			    loader.dataFormat          = URLLoaderDataFormat.TEXT;
+			    
+			    configureListeners(loader);
+			    loader.load(request);
+			}
+			
+			private function configureListeners(dispatcher:IEventDispatcher):void {
+			    dispatcher.addEventListener(Event.COMPLETE, completeHandler);
+			    dispatcher.addEventListener(Event.OPEN, openHandler);
+			    dispatcher.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+			    dispatcher.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+			    dispatcher.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
+			    dispatcher.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			}
+			
+			private function completeHandler(event:Event):void {
+			    var loader:URLLoader = URLLoader(event.target);
+			    var xml:XML  = new XML(loader.data);
+			    var xmllist:XMLList = xml.children();
+			    
+			    // set options.policy and options.signature
+			    for each(var elem:XML in xmllist) {
+			        switch(elem.name().toString()) {
+			            case 'policy':
+			                options.policy = elem.toString();
+			                break;
+			            case 'signature':
+			                options.signature = elem.toString();
+			                break;
+			            case 'bucket':
+			                options.bucket = elem.toString();
+			                break;
+			            case 'accesskeyid':
+			                options.AWSAccessKeyId = elem.toString();
+			                break;
+			            case 'acl':
+			                options.acl = elem.toString();
+			                break;
+			            case 'expirationdate':
+			                options.Expires = elem.toString();
+			                break;
+			            case 'https':
+			                options.Secure = elem.toString();
+			                break;
+			        }
+			    }
+			    
+			    // ===================== //
+			    // Start post file to S3 //
+			    // ===================== //
+			    var request:S3UploadRequest = new S3UploadRequest(options);
+			    
+			    request.addEventListener(Event.OPEN, function(event:Event):void {
+			        textInput.text = "Uploading...";
+			        uploadProgressBar.visible = true;
+			        selectButton.enabled = false;
+			        trace(event);
+			    });
+			    request.addEventListener(ProgressEvent.PROGRESS, function(event:ProgressEvent):void {
+			        uploadProgressBar.setProgress(event.bytesLoaded, event.bytesTotal);
+			    });
+			    request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
+			        uploadProgressBar.visible = false;
+			        selectButton.enabled = true;
+			        textInput.text = "Upload error!";
+			        ExternalInterface.call(options.onFailedCall);
+			        trace(event);
+			    });
+			    request.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {
+			        uploadProgressBar.visible = false;
+			        selectButton.enabled = true;
+			        textInput.text = "Upload error!";
+			        ExternalInterface.call(options.onFailedCall);
+			        trace(event);
+			    });
+			    request.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(event:Event):void {
+			        uploadProgressBar.visible = false;
+			        selectButton.enabled = true;
+			        textInput.text = "Upload complete!";
+			        ExternalInterface.call(options.onSuccessCall);
+			        trace(event);
+			    });
+			    
+			    try {
+			        request.upload(fileReference);
+			    } catch(e:Error) {
+			        uploadProgressBar.visible = false;
+			        selectButton.enabled = true;
+			        textInput.text = "Upload exception!";
+			        trace("An error occurred: " + e);
+			    }
+			}
+			
+			private function openHandler(event:Event):void {
+			    trace("openHandler: " + event);
+			}
+			
+			private function progressHandler(event:ProgressEvent):void {
+			    trace("progressHandler loaded:" + event.bytesLoaded + " total: " + event.bytesTotal);
+			}
+			
+			private function securityErrorHandler(event:SecurityErrorEvent):void {
+			    trace("securityErrorHandler: " + event);
+			}
+			
+			private function httpStatusHandler(event:HTTPStatusEvent):void {
+			    trace("httpStatusHandler: " + event);
+			}
+			
+			private function ioErrorHandler(event:IOErrorEvent):void {
+			    trace("ioErrorHandler: " + event);
+			}
+    	]]>
     </mx:Script>
     
     <mx:Label x="10" y="10" id="textInput" color="#FFFFFF" fontWeight="bold" text="Click the Select File Button... "/>
     <mx:Button x="227" y="7" label="Select" click="browser()" id="selectButton"/>
-    <mx:ProgressBar x="10" y="7" width="200" height="20" labelPlacement="center" id="uploadProgressBar" minimum="0" maximum="100" visible="false" mode="manual"/>
+    <mx:ProgressBar x="10" y="7" width="200" height="20" labelPlacement="center" id="uploadProgressBar" visible="false" mode="manual"/>
     
 </mx:Application>
