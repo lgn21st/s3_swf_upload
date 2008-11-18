@@ -3,7 +3,6 @@
 
     <mx:Script>
     	<![CDATA[
-    		import mx.controls.Alert;
 			import flash.external.ExternalInterface;
 			import flash.net.FileReference;
 			import com.adobe.net.MimeTypeMap;
@@ -101,34 +100,14 @@
 			private function completeHandler(event:Event):void {
 			    var loader:URLLoader = URLLoader(event.target);
 			    var xml:XML  = new XML(loader.data);
-			    var xmllist:XMLList = xml.children();
 			    
-			    // set options.policy and options.signature
-			    for each(var elem:XML in xmllist) {
-			        switch(elem.name().toString()) {
-			            case 'policy':
-			                options.policy = elem.toString();
-			                break;
-			            case 'signature':
-			                options.signature = elem.toString();
-			                break;
-			            case 'bucket':
-			                options.bucket = elem.toString();
-			                break;
-			            case 'accesskeyid':
-			                options.AWSAccessKeyId = elem.toString();
-			                break;
-			            case 'acl':
-			                options.acl = elem.toString();
-			                break;
-			            case 'expirationdate':
-			                options.Expires = elem.toString();
-			                break;
-			            case 'https':
-			                options.Secure = elem.toString();
-			                break;
-			        }
-			    }
+			    options.policy         = xml.policy;
+			    options.signature      = xml.signature;
+			    options.bucket         = xml.bucket;
+			    options.AWSAccessKeyId = xml.accesskeyid;
+			    options.acl            = xml.acl;
+			    options.Expires        = xml.expirationdate;
+			    options.Secure         = xml.https;
 			    
 			    // ===================== //
 			    // Start post file to S3 //
@@ -179,22 +158,19 @@
 			private function openHandler(event:Event):void {
 			    trace("openHandler: " + event);
 			}
-			
 			private function progressHandler(event:ProgressEvent):void {
 			    trace("progressHandler loaded:" + event.bytesLoaded + " total: " + event.bytesTotal);
 			}
-			
 			private function securityErrorHandler(event:SecurityErrorEvent):void {
 			    trace("securityErrorHandler: " + event);
 			}
-			
 			private function httpStatusHandler(event:HTTPStatusEvent):void {
 			    trace("httpStatusHandler: " + event);
 			}
-			
 			private function ioErrorHandler(event:IOErrorEvent):void {
 			    trace("ioErrorHandler: " + event);
 			}
+			
     	]]>
     </mx:Script>
     
