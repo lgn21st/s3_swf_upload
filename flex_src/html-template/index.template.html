@@ -3,19 +3,15 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script type="text/javascript" src="swfobject.js"></script>
+    <script type="text/javascript" src="${application}.js"></script>
     <title>${title}</title>
 </head>
 
 <body scroll="no">
     <script type="text/javascript">
         swfobject.embedSWF("${application}.swf", "${application}", "${width}", "${height}", "${version_major}.${version_minor}.${version_revision}");
-        function s3_upload()  {document["${application}"].init("http://localhost:3000/s3_signatures", "", "", "", "");}
-        function onSuccess()  {}
-        function onFailed()   {}
-        function onSelected() {}
-        function onCancel()   {}
     </script>
     <div id="${application}"></div>
-    <br/><a href="#" onclick="document['${application}'].upload('assets/temp/');">Start Upload</a>
+    <br/><a href="#" onclick="s3_swf.upload('assets/temp/');">Start Upload</a>
 </body>
 </html>

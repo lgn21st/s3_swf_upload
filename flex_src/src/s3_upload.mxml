@@ -17,7 +17,7 @@
 			    if (ExternalInterface.available) {
 			      ExternalInterface.addCallback("init", init);
 			      ExternalInterface.addCallback("upload", upload);
-			      ExternalInterface.call('s3_upload');
+			      ExternalInterface.call('s3_swf.init');
 			    }
 			}
 			
@@ -61,7 +61,8 @@
 			    
 			    // return if user not selected any file
 			    if (options.FileSize == null) {
-			        ExternalInterface.call(this.options.onSuccessCall);
+			    	trace(options.onSuccessCall);
+			        ExternalInterface.call(options.onSuccessCall);
 			        return;
 			    }
 			    
@@ -127,6 +128,7 @@
 			        uploadProgressBar.visible = false;
 			        selectButton.enabled = true;
 			        textInput.text = "Upload error!";
+			        trace(options.onFailedCall);
 			        ExternalInterface.call(options.onFailedCall);
 			        trace(event);
 			    });
@@ -134,6 +136,7 @@
 			        uploadProgressBar.visible = false;
 			        selectButton.enabled = true;
 			        textInput.text = "Upload error!";
+			        trace(options.onFailedCall);
 			        ExternalInterface.call(options.onFailedCall);
 			        trace(event);
 			    });
@@ -141,6 +144,7 @@
 			        uploadProgressBar.visible = false;
 			        selectButton.enabled = true;
 			        textInput.text = "Upload complete!";
+			        trace(options.onSuccessCall);
 			        ExternalInterface.call(options.onSuccessCall);
 			        trace(event);
 			    });
