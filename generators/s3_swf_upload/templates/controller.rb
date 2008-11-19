@@ -1,13 +1,10 @@
 require 'base64'
 
-class S3SignaturesController < ApplicationController
+class S3UploadsController < ApplicationController
   skip_before_filter :verify_authenticity_token
   include S3SwfUpload::Signature
   
   def index
-  end
-  
-  def create
     bucket          = S3SwfUpload::S3Config.bucket
     access_key_id   = S3SwfUpload::S3Config.access_key_id
     key             = params[:key]

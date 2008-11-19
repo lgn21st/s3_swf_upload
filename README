@@ -13,7 +13,7 @@ Usage
 
 1. $ script/generate s3_swf_upload
 
-2. configure amazon_s3.yml.
+2. configure amazon_s3.yml, you need put a crossdomain.xml in your bucket and make it public-read.
 
 3. include s3_upload.js in your layouts:
 

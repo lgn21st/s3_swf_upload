@@ -21,7 +21,7 @@ function s3_swf_init(id, options)
 
   swfobject.embedSWF("/s3_upload.swf", id, width, height, version);
 
-  signature_url = window.location.protocol + '//' + window.location.host + '/s3_signatures'
+  signature_url = window.location.protocol + '//' + window.location.host + '/s3_uploads'
   
   s3_swf = {
     obj: function() { return document[id]; },
