@@ -81,7 +81,7 @@
 			    variables.key              = options.key;
 			    variables.content_type     = options.ContentType;
 			    
-			    request.method             = URLRequestMethod.POST;
+			    request.method             = URLRequestMethod.GET;
 			    request.data               = variables;
 			    loader.dataFormat          = URLLoaderDataFormat.TEXT;
 			    
