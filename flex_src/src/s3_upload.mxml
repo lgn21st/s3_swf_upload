@@ -122,6 +122,8 @@
 			        trace(event);
 			    });
 			    request.addEventListener(ProgressEvent.PROGRESS, function(event:ProgressEvent):void {
+			    	var penct:uint = uint(event.bytesLoaded / event.bytesTotal * 100);
+			    	uploadProgressBar.label = 'Uploading ' + penct + " %";
 			        uploadProgressBar.setProgress(event.bytesLoaded, event.bytesTotal);
 			    });
 			    request.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
@@ -180,6 +182,6 @@
     
     <mx:Label x="10" y="10" id="textInput" color="#FFFFFF" fontWeight="bold" text="Click the Select File Button... "/>
     <mx:Button x="227" y="7" label="Select" click="browser()" id="selectButton"/>
-    <mx:ProgressBar x="10" y="7" width="200" height="20" labelPlacement="center" id="uploadProgressBar" visible="false" mode="manual"/>
+    <mx:ProgressBar x="10" y="7" width="200" height="20" labelPlacement="center" id="uploadProgressBar" visible="false" mode="manual" label="Uploading..."/>
     
 </mx:Application>
