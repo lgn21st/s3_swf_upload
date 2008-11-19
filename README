@@ -11,28 +11,41 @@ Install goes here.
 Usage
 =======
 
-1. $ script/generate s3_swf
+1. $ script/generate s3_swf_upload
 
-2. include s3 swf in your view.
+2. configure amazon_s3.yml.
 
-<%= s3_swf_tag %>
+3. include s3_upload.js in your layouts:
 
-3. init s3 swf with js:
+  <%= javascript_include_tag 's3_upload' %>
 
-  function s3_upload() { s3_swf.init(url, 'onSelected', 'onSuccess', 'onFailed', 'onCancel'); }
+4. init s3_swf object:
 
-  s3_swf is a global var which reference to the s3 swf object.
+  <script type='text/javascript'>
+    s3_swf = s3_swf_init('s3_upload', {
+      width:  300,
+      height: 35,
+      onSuccess: function(){
+        alert('Transfer complete');
+	  },
+      onFailed: function(status){
+        alert('Transfer Failed');
+	  },
+	  onFileSelected: function(filename, size){
+        alert('File selected: ' + filename);
+	  },
+	  onCancel: function(){
+		alert('Transfer canceled');
+	  }
+    });
+  </script>
   
-  S3_swf.init() provides 4 callbacks at currently:
+  <div id='s3_upload'>
+    Please <a href="http://www.adobe.com/go/getflashplayer">Update</a> your Flash Player to Flash v9.0.1 or higher...
+  </div>
 
-    1. onSuccess, be called after an upload finished
-    2. onFailed, be called if an upload is failed
-    3. onSelected, be called when user choose a file
-    4. onCancel, be called when an upload is cancelled
+  <%= link_to_function 'Upload', 's3_swf.upload("prefix/")' %>
 
-4. upload selected file to specify path.
-
-    s3_swf.upload(prefix_path)
-
+5. when you click upload, your file will be upload to http://bucket.s3.amazonasw.com/prefix/
 
 Copyright (c) 2008 elctech, released under the MIT license
