@@ -1,19 +1,18 @@
 require 'base64'
 
-class S3SignaturesController < ApplicationController
+class S3UploadsController < ApplicationController
   skip_before_filter :verify_authenticity_token
   include S3SwfUpload::Signature
   
   def index
-  end
-  
-  def create
-    expiration_date = params[:expiration_date]
-    bucket          = params[:bucket]
-    acl             = params[:acl]
-    content_type    = params[:content_type]
+    bucket          = S3SwfUpload::S3Config.bucket
+    access_key_id   = S3SwfUpload::S3Config.access_key_id
     key             = params[:key]
+    content_type    = params[:content_type]
     file_size       = params[:file_size]
+    acl             = 'private'
+    https           = 'false'
+    expiration_date = 1.hours.from_now.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
     policy = Base64.encode64(
 "{
@@ -32,8 +31,15 @@ class S3SignaturesController < ApplicationController
 
     respond_to do |format|
       format.xml {
-        render :xml => {:policy    => policy,
-                        :signature => signature}.to_xml
+        render :xml => {
+          :policy          => policy,
+          :signature       => signature,
+          :bucket          => bucket,
+          :accesskeyid     => access_key_id,
+          :acl             => acl,
+          :expirationdate  => expiration_date,
+          :https           => https
+        }.to_xml
       }
     end
   end

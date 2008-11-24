@@ -1,0 +1,17 @@
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="swfobject.js"></script>
+    <script type="text/javascript" src="${application}.js"></script>
+    <title>${title}</title>
+</head>
+
+<body scroll="no">
+    <script type="text/javascript">
+        swfobject.embedSWF("${application}.swf", "${application}", "${width}", "${height}", "${version_major}.${version_minor}.${version_revision}");
+    </script>
+    <div id="${application}"></div>
+    <br/><a href="#" onclick="s3_swf.upload('assets/temp/');">Start Upload</a>
+</body>
+</html>

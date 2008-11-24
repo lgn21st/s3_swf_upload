@@ -7,12 +7,12 @@ class S3SwfUploadGenerator < Rails::Generator::Base
 
   def manifest
     record do |m|
-      m.file 'controller.rb', 'app/controllers/s3_signatures_controller.rb'
+      m.file 'controller.rb', 'app/controllers/s3_uploads_controller.rb'
       m.file 'amazon_s3.yml', 'config/amazon_s3.yml'
-      m.file 'initializer.rb', 'config/initializers/s3_swf_upload.rb'
-      m.file 'AC_OETags.js', 'public/javascripts/AC_OETags.js'
-      m.file 'S3SWFUpload.swf', 'public/S3SWFUpload.swf'
-      m.route_resources 's3_signatures'
+      m.file 'initializer.rb', 'config/initializers/s3_upload.rb'
+      m.file 's3_upload.js', 'public/javascripts/s3_upload.js'
+      m.file 's3_upload.swf', 'public/s3_upload.swf'
+      m.route_resources 's3_uploads'
     end
   end
 end
